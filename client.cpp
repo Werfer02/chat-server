@@ -9,13 +9,14 @@ void receiveLoop(tcp::socket& s){
         char data[1024];
         size_t length = s.read_some(boost::asio::buffer(data));
         std::cout << "\033[G" << "[Server]: " << std::string(data, length) << "\n";
-        std::cout << "------------------------------------------------\n[Client]: ";
+        std::cout << "[Client]: ";
     }
 }
 
 int main(){
     std::cout << "hello world\n\n";
     std::string ip, port;
+    
     std::cout << "ip to connect to:";
     std::cin >> ip;
     std::cout << "port:";
@@ -35,7 +36,7 @@ int main(){
     receivethread.detach();
 
     while(true){
-        std::cout << "------------------------------------------------\n[Client]: ";
+        std::cout << "[Client]: ";
         std::string msg;
         std::cin >> msg;
         std::cout << "\n";

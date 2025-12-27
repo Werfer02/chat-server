@@ -15,8 +15,8 @@ void receiveLoop(tcp::socket& s){
 
 int main(){
     std::cout << "hello world\n\n";
-
     std::string port;
+    
     std::cout << "port to listen on:";
     std::cin >> port;
 
