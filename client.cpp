@@ -4,17 +4,58 @@
 
 using boost::asio::ip::tcp;
 
+class Client {
+    boost::asio::io_context io_context;
+public:
+    tcp::resolver::results_type resolve(std::string ip, std::string port){
+        tcp::resolver resolver(io_context);
+        return resolver.resolve(ip, port);
+    }
+    tcp::socket connect(tcp::resolver::results_type endpoints){
+        tcp::socket s(io_context);
+        boost::asio::connect(s, endpoints);
+        return s;
+    }
+    tcp::socket resolve_and_connect(std::string ip, std::string port){
+        auto endpoints = resolve(ip, port);
+        tcp::socket s = connect(endpoints);
+        return s;
+    }
+};
+
+std::string receive(tcp::socket& s){
+    boost::asio::streambuf buf;
+    boost::asio::read_until(s, buf, '\n');
+    std::istream is(&buf);
+    std::string data;
+    std::getline(is, data);
+    return data;
+}
+
 void receiveLoop(tcp::socket& s){
+    std::string received;
     while(true){
-        char data[1024];
-        size_t length = s.read_some(boost::asio::buffer(data));
-        std::cout << "\033[G" << "[Server]: " << std::string(data, length) << "\n";
-        std::cout << "[Client]: ";
+        received = receive(s);
+        std::cout << "[Server]: " << received << "\n";
     }
 }
 
+#ifdef _WIN32
+    void initConsole() {
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        DWORD mode;
+        GetConsoleMode(hConsole, &mode);
+        SetConsoleMode(hConsole, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING); // add this flag to the console mode
+    }
+#else
+    void initConsole() {}
+#endif
+
 int main(){
     std::cout << "hello world\n\n";
+
+    initConsole();
+    
     std::string ip, port;
     
     std::cout << "ip to connect to:";
@@ -22,24 +63,18 @@ int main(){
     std::cout << "port:";
     std::cin >> port;
 
-    boost::asio::io_context io_context;
-
-    tcp::resolver resolver(io_context);
-    auto endpoints = resolver.resolve(ip, port);
-
-    tcp::socket socket(io_context);
+    Client client;
     std::cout << "connecting to server...\n";
-    boost::asio::connect(socket, endpoints);
+    tcp::socket socket = client.resolve_and_connect(ip, port);
     std::cout << "connected!\n";
 
     std::thread receivethread(receiveLoop, std::ref(socket));
     receivethread.detach();
 
     while(true){
-        std::cout << "[Client]: ";
         std::string msg;
-        std::cin >> msg;
-        std::cout << "\n";
+        std::getline(std::cin, msg);
+        msg.append("\n");
         boost::asio::write(socket, boost::asio::buffer(msg));
     }
 }

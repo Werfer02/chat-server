@@ -4,15 +4,6 @@
 
 using boost::asio::ip::tcp;
 
-void receiveLoop(tcp::socket& s){
-    while(true){
-        char data[1024];
-        size_t length = s.read_some(boost::asio::buffer(data));
-        std::cout << "\033[G" <<  "[Client]: " << std::string(data, length) << "\n";
-        std::cout << "[Server]: ";
-    }
-}
-
 class Server {
     boost::asio::io_context io_context;
 public:
@@ -22,36 +13,59 @@ public:
         acceptor.accept(socket);
         return socket;
     }
-    
-
-
 };
+
+std::string receive(tcp::socket& s){
+    boost::asio::streambuf buf;
+    boost::asio::read_until(s, buf, '\n');
+    std::istream is(&buf);
+    std::string data;
+    std::getline(is, data);
+    return data;
+}
+
+void receiveLoop(tcp::socket& s){
+    std::string received;
+    while(true){
+        received = receive(s);
+        std::cout << "[Client]: " << received << "\n";
+    }
+}
+
+#ifdef _WIN32
+    void initConsole() {
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        DWORD mode;
+        GetConsoleMode(hConsole, &mode);
+        SetConsoleMode(hConsole, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING); // add this flag to the console mode
+    }
+#else
+    void initConsole() {}
+#endif
+
 
 int main(){
     std::cout << "hello world\n\n";
+
+    initConsole();
+
     std::string port;
-    
     std::cout << "port to listen on:";
     std::cin >> port;
 
-    boost::asio::io_context io_context;
-
-    tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), stoi(port)));
-
-    tcp::socket socket(io_context);
+    Server server;
 
     std::cout << "listening on port " << port << "...\n";
-    acceptor.accept(socket);
+    tcp::socket socket = server.accept(stoi(port));
     std::cout << "client connected!\n";
 
     std::thread receivethread(receiveLoop, std::ref(socket));
     receivethread.detach();
 
     while(true){
-        std::cout << "[Server]: ";
         std::string msg;
-        std::cin >> msg;
-        std::cout << "\n";
+        std::getline(std::cin, msg);
+        msg.append("\n");
         boost::asio::write(socket, boost::asio::buffer(msg));
     }
     
