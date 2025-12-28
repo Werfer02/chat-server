@@ -13,6 +13,20 @@ void receiveLoop(tcp::socket& s){
     }
 }
 
+class Server {
+    boost::asio::io_context io_context;
+public:
+    tcp::socket accept(int port){
+        tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), port));
+        tcp::socket socket(io_context);
+        acceptor.accept(socket);
+        return socket;
+    }
+    
+
+
+};
+
 int main(){
     std::cout << "hello world\n\n";
     std::string port;
