@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.30)
-project(server VERSION 0.0.0 LANGUAGES C CXX)
+project(chat-server VERSION 0.0.0 LANGUAGES C CXX)
 
-add_executable(server server.cpp)
-add_executable(client client.cpp)
+add_executable(chat-server main.cpp chat.cpp client.cpp server.cpp util.cpp)
+
+target_include_directories(chat-server PRIVATE include)
 
 if (WIN32)
     target_link_libraries(server PRIVATE ws2_32)
