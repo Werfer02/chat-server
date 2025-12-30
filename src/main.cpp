@@ -15,6 +15,19 @@ void receiveLoop(tcp::socket& s, Chat& c){
     }
 }
 
+void writeLoop(tcp::socket& s, Chat& c){
+    while(true){
+        std::string msg;
+        std::getline(std::cin, msg);
+
+        c.addMessage({msg, c.username});
+        std::cout << "\033[H\033[J" << c;
+
+        msg.append("\n");
+        boost::asio::write(s, boost::asio::buffer(msg));
+    }
+}
+
 #ifdef _WIN32
     void initConsole() {
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -35,8 +48,10 @@ int main(){
 
     std::string choice;
     std::cout << "client or server:";
+    std::cin >> choice;
     
     if(choice == "Client" || choice == "client" || choice == "C" || choice == "c"){
+        chat.username = "Client";
         choice = "Client";
         std::string ip, port;
     
@@ -52,9 +67,10 @@ int main(){
 
         std::thread receivethread(receiveLoop, std::ref(socket), std::ref(chat));
         receivethread.detach();
+        writeLoop(socket, chat);
     }
     else if(choice == "Server" || choice == "server" || choice == "S" || choice == "s"){
-        choice = "Server";
+        chat.username = "Server";
         std::string port;
 
         std::cout << "port to listen on:";
@@ -67,20 +83,10 @@ int main(){
 
         std::thread receivethread(receiveLoop, std::ref(socket), std::ref(chat));
         receivethread.detach();
+        writeLoop(socket, chat);
     }
     else {
         std::cout << "WRONG!!!\n";
-        return;
-    }
-
-    while(true){
-        std::string msg;
-        std::getline(std::cin, msg);
-
-        chat.addMessage({msg, choice});
-        std::cout << "\033[H\033[J" << chat;
-
-        msg.append("\n");
-        boost::asio::write(socket, boost::asio::buffer(msg));
+        return 1;
     }
 }

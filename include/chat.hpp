@@ -22,7 +22,4 @@ public:
     std::ostream& render(std::ostream& s);
 };
 
-std::ostream& operator<<(std::ostream& s, Chat& c){
-    c.render(s);
-    return s;
-}
+std::ostream& operator<<(std::ostream& s, Chat& c);

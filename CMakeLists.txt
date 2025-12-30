@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.30)
 project(chat-server VERSION 0.0.0 LANGUAGES C CXX)
 
-add_executable(chat-server main.cpp chat.cpp client.cpp server.cpp util.cpp)
+add_executable(chat-server src/main.cpp
+                           src/chat.cpp
+                           src/client.cpp
+                           src/server.cpp
+                           src/util.cpp)
 
 target_include_directories(chat-server PRIVATE include)
 
