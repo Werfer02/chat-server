@@ -9,15 +9,13 @@ add_executable(chat-server src/main.cpp
 
 target_include_directories(chat-server PRIVATE include)
 
-find_package(Boost REQUIRED)
-
-if (NOT Boost_FOUND)
-    message(FATAL_ERROR "Boost not found! Please set Boost_DIR or install Boost.")
-endif()
-
-target_include_directories(chat-server PRIVATE ${Boost_INCLUDE_DIRS})
-
-
 if (WIN32)
-    target_link_libraries(chat-server PRIVATE ws2_32 ${Boost_LIBRARIES})
+    if (NOT BOOST_ROOT)
+        set(BOOST_ROOT "") # set your Boost install dir here, eg. "C:\Program Files\Boost\boost_1_90_0"
+        if(NOT BOOST_ROOT)
+            message(FATAL_ERROR "please set BOOST_ROOT to your Boost install dir")
+        endif()
+    endif()
+    target_include_directories(chat-server PRIVATE ${BOOST_ROOT})
+    target_link_libraries(chat-server PRIVATE ws2_32)
 endif()
