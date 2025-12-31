@@ -7,11 +7,11 @@
 #include "util.hpp"
 
 void receiveLoop(tcp::socket& s, Chat& c){
-    std::string received;
+    ChatMessage received;
     while(true){
-        received = receive(s);
-        c.addMessage({received, (c.username == "Client" ? "Server" : "Client")});
-        std::cout << "\033[H\033[J" << c;
+        received = receiveMessage(s);
+        c.addMessage(received);
+        std::cout << clearScreen << c;
     }
 }
 
@@ -20,11 +20,10 @@ void writeLoop(tcp::socket& s, Chat& c){
         std::string msg;
         std::getline(std::cin, msg);
 
-        c.addMessage({msg, c.username});
-        std::cout << "\033[H\033[J" << c;
+        sendMessage(s, msg, c.username);
 
-        msg.append("\n");
-        boost::asio::write(s, boost::asio::buffer(msg));
+        c.addMessage({msg, c.username});
+        std::cout << clearScreen << c;
     }
 }
 
