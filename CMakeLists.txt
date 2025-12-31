@@ -9,6 +9,11 @@ add_executable(chat-server src/main.cpp
 
 target_include_directories(chat-server PRIVATE include)
 
+find_package(Boost REQUIRED)
+target_include_directories(chat-server PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries(chat-server PRIVATE ${Boost_LIBRARIES})
+
+
 if (WIN32)
     target_link_libraries(chat-server PRIVATE ws2_32)
 endif()
