@@ -16,6 +16,9 @@ if (WIN32)
             message(FATAL_ERROR "please set BOOST_ROOT to your Boost install dir")
         endif()
     endif()
+
     target_include_directories(chat-server PRIVATE ${BOOST_ROOT})
+
+    target_link_options(chat-server PRIVATE -static-libgcc -static-libstdc++ -static)
     target_link_libraries(chat-server PRIVATE ws2_32)
 endif()
