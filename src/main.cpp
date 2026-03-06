@@ -6,7 +6,11 @@
 #include "server.hpp"
 #include "util.hpp"
 
-void receiveLoop(tcp::socket& s, Chat& c){
+#include "boost/asio/ssl.hpp"
+
+namespace ssl = boost::asio::ssl;
+
+void receiveLoop(ssl_socket& s, Chat& c){
     ChatMessage received;
     while(true){
         received = receiveMessage(s);
@@ -15,7 +19,7 @@ void receiveLoop(tcp::socket& s, Chat& c){
     }
 }
 
-void writeLoop(tcp::socket& s, Chat& c){
+void writeLoop(ssl_socket& s, Chat& c){
     while(true){
         std::string msg;
         std::getline(std::cin, msg);
@@ -39,7 +43,6 @@ void writeLoop(tcp::socket& s, Chat& c){
 #endif
 
 int main(){
-    std::cout << "hello world\n\n";
 
     initConsole();
 
@@ -61,7 +64,7 @@ int main(){
 
         Client client;
         std::cout << "connecting to server...\n";
-        tcp::socket socket = client.resolve_and_connect(ip, port);
+        ssl_socket socket = client.resolve_and_connect(ip, port);
         std::cout << "connected!\n";
 
         std::thread receivethread(receiveLoop, std::ref(socket), std::ref(chat));
@@ -77,7 +80,7 @@ int main(){
 
         Server server;
         std::cout << "listening on port " << port << "...\n";
-        tcp::socket socket = server.accept(stoi(port));
+        ssl_socket socket = server.accept(stoi(port));
         std::cout << "connected!";
 
         std::thread receivethread(receiveLoop, std::ref(socket), std::ref(chat));

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.30)
 project(chat-server VERSION 0.0.0 LANGUAGES C CXX)
 
+find_package(OpenSSL REQUIRED)
+
 add_executable(chat-server src/main.cpp
                            src/chat.cpp
                            src/client.cpp
@@ -8,6 +10,12 @@ add_executable(chat-server src/main.cpp
                            src/util.cpp)
 
 target_include_directories(chat-server PRIVATE include)
+
+target_link_libraries(chat-server
+    PRIVATE
+    OpenSSL::SSL
+    OpenSSL::Crypto
+)
 
 if (WIN32)
     if (NOT BOOST_ROOT)

@@ -1,6 +1,6 @@
 #include "util.hpp"
 
-ChatMessage receiveMessage(tcp::socket& s){
+ChatMessage receiveMessage(ssl_socket& s){
 
     boost::asio::streambuf buf;
     std::istream is(&buf);
@@ -16,7 +16,7 @@ ChatMessage receiveMessage(tcp::socket& s){
     return {msg, author};
 }
 
-void sendMessage(tcp::socket& s, std::string msg, std::string author){
+void sendMessage(ssl_socket& s, std::string msg, std::string author){
     std::string formatted = msg + "\n" + author + "\n";
     boost::asio::write(s, boost::asio::buffer(formatted));
 }
